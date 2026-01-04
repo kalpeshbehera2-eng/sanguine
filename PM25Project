@@ -1,0 +1,65 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Wind } from 'lucide-react';
+
+const PM25_LEVELS = [
+  { max: 12, label: 'Good', color: '#22c55e' },
+  { max: 35.4, label: 'Moderate', color: '#eab308' },
+  { max: 55.4, label: 'Unhealthy for Sensitive', color: '#f97316' },
+  { max: 150.4, label: 'Unhealthy', color: '#ef4444' },
+  { max: 250.4, label: 'Very Unhealthy', color: '#a855f7' },
+  { max: 500, label: 'Hazardous', color: '#7f1d1d' },
+];
+
+export function getPM25Level(pm25) {
+  return PM25_LEVELS.find(level => pm25 <= level.max) || PM25_LEVELS[5];
+}
+
+export default function PM25Card({ value = 0 }) {
+  const level = getPM25Level(value);
+  const percentage = Math.min((value / 250) * 100, 100);
+
+  return (
+    <motion.div 
+      className="bg-white/5 backdrop-blur-xl rounded-2xl p-5 border border-white/10"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-xl bg-white/10">
+            <Wind className="w-5 h-5 text-teal-400" />
+          </div>
+          <span className="text-white/70 text-sm font-medium">PM2.5</span>
+        </div>
+        <span 
+          className="text-xs px-2 py-1 rounded-full font-medium"
+          style={{ backgroundColor: `${level.color}20`, color: level.color }}
+        >
+          {level.label}
+        </span>
+      </div>
+      
+      <div className="flex items-end gap-2 mb-3">
+        <span className="text-3xl font-bold text-white">{value}</span>
+        <span className="text-white/40 text-sm mb-1">µg/m³</span>
+      </div>
+      
+      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: level.color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </div>
+      
+      <div className="flex justify-between mt-2 text-xs text-white/40">
+        <span>0</span>
+        <span>250+</span>
+      </div>
+    </motion.div>
+  );
+}

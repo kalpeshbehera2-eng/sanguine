@@ -1,0 +1,29 @@
+{
+  "name": "ChatMessage",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "The chat message content"
+    },
+    "location": {
+      "type": "string",
+      "description": "Location mentioned in the message"
+    },
+    "aqi_report": {
+      "type": "number",
+      "description": "AQI level reported by user"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user who sent the message"
+    },
+    "user_avatar": {
+      "type": "string",
+      "description": "Avatar URL of the user"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

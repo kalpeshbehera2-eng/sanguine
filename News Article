@@ -1,0 +1,40 @@
+{
+  "name": "NewsArticle",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "News headline"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of the news"
+    },
+    "source": {
+      "type": "string",
+      "description": "News source"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "government_initiative",
+        "environment",
+        "pollution",
+        "health"
+      ],
+      "description": "Category of news"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Image URL for the news"
+    },
+    "external_link": {
+      "type": "string",
+      "description": "Link to full article"
+    }
+  },
+  "required": [
+    "title",
+    "summary"
+  ]
+}

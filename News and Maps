@@ -1,0 +1,309 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Newspaper, Map, BarChart3, MessageSquare, Loader2 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
+import NewsCard from '../components/news/NewsCard';
+import AQIMap from '../components/map/AQIMap';
+import AQIChart from '../components/charts/AQIChart';
+import ChatSection from '../components/chat/ChatSection';
+
+const SAMPLE_NEWS = [
+  {
+    id: 1,
+    title: 'Government Launches National Clean Air Programme 2.0',
+    summary: 'The new initiative aims to reduce particulate matter concentration by 40% in 131 cities by 2026.',
+    category: 'government_initiative',
+    source: 'Ministry of Environment',
+    image_url: 'https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=600',
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    title: 'Electric Vehicle Adoption Surges by 45% This Year',
+    summary: 'Record sales of electric vehicles contribute to reducing urban air pollution levels.',
+    category: 'environment',
+    source: 'Green Transport Weekly',
+    image_url: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=600',
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    title: 'Industrial Emissions Down 20% After New Regulations',
+    summary: 'Strict implementation of emission norms leads to significant improvement in air quality near industrial zones.',
+    category: 'pollution',
+    source: 'Environmental Watch',
+    image_url: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=600',
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: 4,
+    title: 'Air Pollution Linked to 10% Rise in Respiratory Cases',
+    summary: 'Health experts urge citizens to take precautions as pollution-related illnesses increase during winter months.',
+    category: 'health',
+    source: 'Health Today',
+    image_url: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=600',
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: 5,
+    title: 'New Green Zones Established in Metropolitan Areas',
+    summary: 'City authorities designate vehicle-free zones to combat urban air pollution.',
+    category: 'government_initiative',
+    source: 'Urban Planning Digest',
+    image_url: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600',
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: 6,
+    title: 'Breakthrough in Air Purification Technology',
+    summary: 'Scientists develop new nano-filter that can remove 99.9% of fine particulate matter.',
+    category: 'environment',
+    source: 'Science Daily',
+    image_url: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600',
+    created_date: new Date().toISOString(),
+  },
+];
+
+export default function NewsAndMaps() {
+  const [activeTab, setActiveTab] = useState('news');
+  const [userLocation, setUserLocation] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+    };
+    fetchUser();
+  }, []);
+
+  const { data: newsArticles = [], isLoading: isLoadingNews } = useQuery({
+    queryKey: ['newsArticles'],
+    queryFn: () => base44.entities.NewsArticle.list('-created_date', 20),
+  });
+
+  // Combine database news with sample news
+  const allNews = [...newsArticles, ...SAMPLE_NEWS];
+
+  useEffect(() => {
+    // Get user location for map
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        () => {
+          // Default to Delhi if geolocation fails
+          setUserLocation({ lat: 28.6139, lng: 77.2090 });
+        }
+      );
+    }
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            News, Maps & Analytics
+          </h1>
+          <p className="text-white/50">
+            Stay informed with latest updates, explore AQI zones, and analyze trends.
+          </p>
+        </motion.div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="news" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-4 bg-white/5 rounded-xl p-1 mb-8">
+            <TabsTrigger 
+              value="news"
+              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white text-white/50 text-xs sm:text-sm"
+            >
+              <Newspaper className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">News</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="map"
+              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white text-white/50 text-xs sm:text-sm"
+            >
+              <Map className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Map</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="charts"
+              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white text-white/50 text-xs sm:text-sm"
+            >
+              <BarChart3 className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Trends</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="chat"
+              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white text-white/50 text-xs sm:text-sm"
+            >
+              <MessageSquare className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Chat</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* News Tab */}
+          <TabsContent value="news">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {/* Category Filters */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {['All', 'Government Initiatives', 'Environment', 'Pollution', 'Health'].map((cat) => (
+                  <button
+                    key={cat}
+                    className="px-4 py-2 rounded-full bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-sm border border-white/10"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {isLoadingNews ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="w-8 h-8 text-teal-400 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {allNews.map((article, index) => (
+                    <NewsCard key={article.id} article={article} index={index} />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </TabsContent>
+
+          {/* Map Tab */}
+          <TabsContent value="map">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <AQIMap userLocation={userLocation} />
+              
+              {/* Map Instructions */}
+              <motion.div
+                className="mt-6 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h3 className="text-white font-semibold mb-3">How to Use</h3>
+                <ul className="space-y-2 text-white/60 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">•</span>
+                    Tap on colored zones to view AQI levels and start navigation
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">•</span>
+                    Orange markers indicate speed breakers - you'll be alerted 1 km before
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">•</span>
+                    Health advisory popup will remind you to wear a mask before navigating
+                  </li>
+                </ul>
+              </motion.div>
+            </motion.div>
+          </TabsContent>
+
+          {/* Charts Tab */}
+          <TabsContent value="charts">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6"
+            >
+              <AQIChart />
+              
+              {/* Stats Summary */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: '7-Day Average', value: '142', change: '-12%', positive: true },
+                  { label: 'Peak AQI', value: '287', change: '+5%', positive: false },
+                  { label: 'Good Days', value: '3', change: '+2', positive: true },
+                  { label: 'Hazardous Days', value: '1', change: '-1', positive: true },
+                ].map((stat) => (
+                  <motion.div
+                    key={stat.label}
+                    className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="text-white/50 text-xs mb-1">{stat.label}</div>
+                    <div className="text-white text-2xl font-bold">{stat.value}</div>
+                    <div className={`text-xs mt-1 ${stat.positive ? 'text-green-400' : 'text-red-400'}`}>
+                      {stat.change}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          {/* Chat Tab */}
+          <TabsContent value="chat">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            >
+              <ChatSection currentUser={currentUser} />
+              
+              <motion.div
+                className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h3 className="text-white font-semibold mb-4">Community Guidelines</h3>
+                <ul className="space-y-3 text-white/60 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">1.</span>
+                    Share accurate air quality observations from your location
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">2.</span>
+                    Include your area/locality for better community mapping
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">3.</span>
+                    Report any unusual pollution sources or hazards
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">4.</span>
+                    Be respectful and constructive in your feedback
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-teal-400">5.</span>
+                    Help others by sharing local precaution tips
+                  </li>
+                </ul>
+
+                <div className="mt-6 p-4 bg-teal-500/10 rounded-xl border border-teal-500/20">
+                  <h4 className="text-teal-400 font-medium text-sm mb-2">Pro Tip</h4>
+                  <p className="text-white/60 text-xs">
+                    Your feedback helps create a real-time pollution map for your city. The more you contribute, the better our community data becomes!
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

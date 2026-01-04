@@ -1,0 +1,240 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Home, 
+  Droplets, 
+  Fan, 
+  Shield, 
+  Leaf, 
+  Car, 
+  Lightbulb, 
+  Recycle,
+  TreeDeciduous,
+  Bike,
+  Factory,
+  Users
+} from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import PrecautionCard from '../components/articles/PrecautionCard';
+import SuggestionCard from '../components/articles/SuggestionCard';
+
+const PRECAUTIONS = [
+  {
+    icon: 'home',
+    title: 'Seal Your Home',
+    description: 'Close windows and doors to prevent polluted air from entering. Use weather stripping to seal gaps.',
+    color: '#22c55e',
+  },
+  {
+    icon: 'droplets',
+    title: 'Use Mopping Instead of Sweeping',
+    description: 'Wet mopping traps dust particles while sweeping disperses them back into the air.',
+    color: '#3b82f6',
+  },
+  {
+    icon: 'fan',
+    title: 'Use Exhaust Fans',
+    description: 'Install exhaust fans in kitchen and bathrooms to remove indoor pollutants effectively.',
+    color: '#8b5cf6',
+  },
+  {
+    icon: 'shield',
+    title: 'Wear N95 Masks',
+    description: 'When outdoors during high pollution days, use N95 or N99 masks for proper filtration.',
+    color: '#f97316',
+  },
+  {
+    icon: 'leaf',
+    title: 'Indoor Plants',
+    description: 'Keep air-purifying plants like Peace Lily, Snake Plant, and Aloe Vera indoors.',
+    color: '#10b981',
+  },
+  {
+    icon: 'eye',
+    title: 'Protect Your Eyes',
+    description: 'Wear sunglasses or protective eyewear to shield eyes from airborne irritants.',
+    color: '#06b6d4',
+  },
+  {
+    icon: 'heart',
+    title: 'Stay Hydrated',
+    description: 'Drink plenty of water and warm fluids to help flush toxins from your body.',
+    color: '#ec4899',
+  },
+  {
+    icon: 'wind',
+    title: 'Use Air Purifiers',
+    description: 'Install HEPA air purifiers in bedrooms and living areas for cleaner indoor air.',
+    color: '#6366f1',
+  },
+];
+
+const SUGGESTIONS = [
+  {
+    icon: Car,
+    title: 'Use Public Transport',
+    description: 'Reduce vehicle emissions by carpooling or using public transportation.',
+    color: '#22c55e',
+  },
+  {
+    icon: Bike,
+    title: 'Cycle for Short Distances',
+    description: 'Use bicycles for nearby commutes to reduce your carbon footprint.',
+    color: '#3b82f6',
+  },
+  {
+    icon: TreeDeciduous,
+    title: 'Plant Trees',
+    description: 'Participate in tree plantation drives. Each tree absorbs 48 pounds of CO2 per year.',
+    color: '#10b981',
+  },
+  {
+    icon: Recycle,
+    title: 'Reduce, Reuse, Recycle',
+    description: 'Minimize waste and properly dispose of plastics and other pollutants.',
+    color: '#f97316',
+  },
+  {
+    icon: Factory,
+    title: 'Report Polluting Units',
+    description: 'Report industries violating emission norms to local pollution control boards.',
+    color: '#ef4444',
+  },
+  {
+    icon: Lightbulb,
+    title: 'Save Energy',
+    description: 'Switch to LED bulbs and turn off appliances when not in use.',
+    color: '#eab308',
+  },
+  {
+    icon: Leaf,
+    title: 'Avoid Burning Waste',
+    description: "Don't burn leaves, garbage, or crop residue. Compost organic waste instead.",
+    color: '#84cc16',
+  },
+  {
+    icon: Users,
+    title: 'Spread Awareness',
+    description: 'Educate family, friends, and neighbors about air pollution and its effects.',
+    color: '#8b5cf6',
+  },
+];
+
+export default function Articles() {
+  const [activeTab, setActiveTab] = useState('precautions');
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            Health & Environment Guide
+          </h1>
+          <p className="text-white/50 max-w-2xl mx-auto">
+            Essential precautions and suggestions to protect yourself and help reduce air pollution in your community.
+          </p>
+        </motion.div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="precautions" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 bg-white/5 rounded-xl p-1 mb-8">
+            <TabsTrigger 
+              value="precautions"
+              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white text-white/50"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Precautions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="suggestions"
+              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white text-white/50"
+            >
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Reduce Pollution
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="precautions">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              {PRECAUTIONS.map((item, index) => (
+                <PrecautionCard key={item.title} {...item} index={index} />
+              ))}
+            </motion.div>
+
+            {/* Additional Info */}
+            <motion.div
+              className="mt-8 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <h3 className="text-white font-semibold mb-4">When AQI is Above 200</h3>
+              <ul className="space-y-3 text-white/70">
+                <li className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                  <span>Avoid morning and evening walks during peak pollution hours</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                  <span>Keep rescue medications handy if you have asthma or respiratory issues</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                  <span>Avoid outdoor exercise and physical activities</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                  <span>Consult a doctor if you experience breathing difficulties or eye irritation</span>
+                </li>
+              </ul>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="suggestions">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              {SUGGESTIONS.map((item, index) => (
+                <SuggestionCard key={item.title} {...item} index={index} />
+              ))}
+            </motion.div>
+
+            {/* Impact Statistics */}
+            <motion.div
+              className="mt-8 bg-gradient-to-r from-teal-500/20 to-blue-500/20 backdrop-blur-xl rounded-2xl p-6 border border-teal-500/20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <h3 className="text-white font-semibold mb-4">Your Impact Matters</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { value: '48 lbs', label: 'CO2 absorbed by one tree/year' },
+                  { value: '20%', label: 'Emissions reduced by carpooling' },
+                  { value: '30%', label: 'Energy saved with LEDs' },
+                  { value: '1 ton', label: 'Waste reduced by recycling/year' },
+                ].map((stat, index) => (
+                  <div key={index} className="text-center">
+                    <div className="text-2xl font-bold text-teal-400">{stat.value}</div>
+                    <div className="text-white/50 text-xs mt-1">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

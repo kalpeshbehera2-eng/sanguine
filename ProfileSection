@@ -1,0 +1,217 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, LogOut, Camera, Calendar, Mail, X, Save, Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { base44 } from '@/api/base44Client';
+import { useMutation } from '@tanstack/react-query';
+
+export default function ProfileSection({ user, isOpen, onClose, onUpdate }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: user?.full_name || '',
+    age: user?.age || '',
+    avatar: user?.avatar || '',
+    phone: user?.phone || '',
+    city: user?.city || '',
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data) => base44.auth.updateMe(data),
+    onSuccess: (data) => {
+      setIsEditing(false);
+      onUpdate?.(data);
+    },
+  });
+
+  const handleSave = () => {
+    updateMutation.mutate(formData);
+  };
+
+  const handleLogout = () => {
+    base44.auth.logout();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 25 }}
+          className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 border-l border-white/10 overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-semibold text-white">My Profile</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-white/50 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Avatar Section */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative">
+                <Avatar className="w-24 h-24 border-4 border-teal-500/30">
+                  {formData.avatar && <AvatarImage src={formData.avatar} />}
+                  <AvatarFallback className="bg-teal-500/20 text-teal-400 text-2xl">
+                    {(user?.full_name || 'U')[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {isEditing && (
+                  <button className="absolute bottom-0 right-0 p-2 bg-teal-500 rounded-full text-white hover:bg-teal-600 transition-colors">
+                    <Camera className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <h3 className="text-white font-semibold mt-4">{user?.full_name || 'User'}</h3>
+              <p className="text-white/50 text-sm">{user?.email}</p>
+            </div>
+
+            {/* Profile Form */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-white/70">Full Name</Label>
+                {isEditing ? (
+                  <Input
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-lg">
+                    <User className="w-4 h-4 text-white/40" />
+                    <span className="text-white">{user?.full_name || 'Not set'}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/70">Age</Label>
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={formData.age}
+                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                    placeholder="Enter your age"
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-lg">
+                    <Calendar className="w-4 h-4 text-white/40" />
+                    <span className="text-white">{user?.age || 'Not set'}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/70">Email</Label>
+                <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-lg">
+                  <Mail className="w-4 h-4 text-white/40" />
+                  <span className="text-white">{user?.email}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/70">City</Label>
+                {isEditing ? (
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                    placeholder="Enter your city"
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-lg">
+                    <MapPin className="w-4 h-4 text-white/40" />
+                    <span className="text-white">{user?.city || 'Not set'}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-8 space-y-3">
+              {isEditing ? (
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                    className="flex-1 border-white/20 text-white hover:bg-white/10"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={updateMutation.isPending}
+                    className="flex-1 bg-teal-500 hover:bg-teal-600 text-white"
+                  >
+                    {updateMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Save
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  className="w-full bg-white/10 hover:bg-white/20 text-white"
+                >
+                  Edit Profile
+                </Button>
+              )}
+              
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Log Out
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function MapPin(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
